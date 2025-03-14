@@ -54,6 +54,15 @@ def voice():
 
     return str(response)
 
+def transcrire_avec_openai(audio_url):
+    """ 🔍 Utilise OpenAI Whisper pour transcrire l'audio de Twilio """
+    try:
+        response = openai.Audio.transcribe("whisper-1", audio_url)
+        return response.get("text", "Je n'ai pas compris votre commande.")
+    except Exception as e:
+        print(f"❌ Erreur transcription OpenAI: {str(e)}")
+        return "Erreur lors de la transcription."
+
 @app.route("/debug_transcription", methods=['POST'])
 def debug_transcription():
     """ Vérifie les données envoyées par Twilio après l'enregistrement """
