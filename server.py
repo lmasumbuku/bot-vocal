@@ -84,6 +84,31 @@ def transcrire_avec_openai(audio_url):
 
 @app.route("/transcription", methods=['POST'])
 def transcription():
+    """ Vérifie si l’audio est bien récupéré avant l'envoi à OpenAI """
+    audio_url = request.form.get("RecordingUrl", "")
+
+    print(f"🎙️ URL de l'enregistrement reçu : {audio_url}")
+
+    if not audio_url:
+        print("❌ Aucun enregistrement reçu de Twilio !")
+        return "Erreur : Pas d'URL d'enregistrement reçue."
+
+    # 📥 Télécharger l'audio
+    audio_path = "audio_twilio.mp3"
+    response = requests.get(audio_url)
+
+    if response.status_code == 200:
+        with open(audio_path, "wb") as f:
+            f.write(response.content)
+        print("✅ Audio téléchargé avec succès !")
+    else:
+        print(f"❌ Erreur lors du téléchargement : {response.status_code}")
+        return "Erreur de récupération de l'audio."
+
+    return "OK"
+
+@app.route("/transcription", methods=['POST'])
+def transcription():
     """ Récupère la transcription et affiche dans les logs """
     transcribed_text = request.form.get("TranscriptionText", "")
     audio_url = request.form.get("RecordingUrl", "")
