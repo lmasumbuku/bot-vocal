@@ -31,20 +31,20 @@ def test_openai():
 
 @app.route("/voice", methods=['POST'])
 def voice():
-    """ Gère les appels et demande la commande du client """
+    """ Gère les appels et enregistre la commande """
     response = VoiceResponse()
 
     response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
                  voice='alice', language='fr-FR')
 
-    # 🎙️ Enregistrer l'appel et activer la transcription avec une pause pour éviter la coupure
+    # 🎙️ Enregistrer la voix avec transcription activée
     response.record(timeout=10, transcribe=True, transcribe_callback="/transcription", play_beep=True)
 
     # 🔄 Ajouter une pause pour éviter que Twilio raccroche immédiatement
     response.pause(length=3)
 
-    # 🛑 Ajouter un message de confirmation pour éviter la coupure brutale
-    response.say("Merci pour votre commande, nous la traitons.", voice='alice', language='fr-FR')
+    # 🛑 Ajouter une réponse temporaire pour voir si Twilio fonctionne
+    response.say("Merci pour votre commande, elle est en cours de traitement.", voice='alice', language='fr-FR')
 
     return str(response)
 
