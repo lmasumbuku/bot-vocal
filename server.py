@@ -54,31 +54,32 @@ def voice():
 import requests
 
 def transcrire_avec_openai(audio_url):
-    """ 🔍 Télécharge l'audio et l'envoie à OpenAI pour transcription """
+    """ 🔍 Télécharge l'audio et le transcrit avec OpenAI Whisper """
     try:
         print(f"🚀 Téléchargement de l'audio depuis Twilio : {audio_url}")
 
-        # 📥 Télécharger l'audio de Twilio
+        # 📥 Télécharger l'audio
         response = requests.get(audio_url)
         if response.status_code != 200:
-            print(f"❌ Erreur lors du téléchargement de l'audio: {response.status_code}")
+            print(f"❌ Erreur de téléchargement : {response.status_code}")
             return "Erreur de récupération de l'audio."
 
-        # 📂 Sauvegarde temporaire du fichier audio
+        # 📂 Sauvegarde temporaire
         audio_path = "audio_twilio.mp3"
         with open(audio_path, "wb") as f:
             f.write(response.content)
 
-        print("✅ Audio téléchargé avec succès, envoi à OpenAI Whisper...")
+        print("✅ Audio téléchargé avec succès, envoi à OpenAI...")
 
-        # 📤 Envoyer l'audio à OpenAI Whisper pour transcription
+        # 📤 Envoyer l'audio à OpenAI Whisper
         with open(audio_path, "rb") as audio_file:
             whisper_response = openai.Audio.transcribe("whisper-1", audio_file)
 
+        print(f"✅ Réponse OpenAI : {whisper_response.get('text')}")
         return whisper_response.get("text", "Je n'ai pas compris votre commande.")
-    
+
     except Exception as e:
-        print(f"❌ Erreur transcription OpenAI: {str(e)}")
+        print(f"❌ Erreur OpenAI Whisper : {str(e)}")
         return "Erreur lors de la transcription."
 
 @app.route("/transcription", methods=['POST'])
