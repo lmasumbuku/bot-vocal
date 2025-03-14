@@ -14,10 +14,12 @@ def voice():
     response = VoiceResponse()
 
     gather = Gather(input="dtmf", num_digits=1, action="/menu_choice")
-    gather.say("Bienvenue ! Pour commander, appuyez sur 1 pour une pizza, 2 pour un burger, 3 pour une salade.")
+    gather.say("Bienvenue ! Pour commander, appuyez sur 1 pour une pizza, 2 pour un burger, 3 pour une salade.", 
+               voice='fr-FR-Wavenet-A', language='fr-FR')
     
     response.append(gather)
-    response.say("Nous n'avons pas reçu votre choix. Merci de réessayer.")
+    response.say("Nous n'avons pas reçu votre choix. Merci de réessayer.", 
+                 voice='fr-FR-Wavenet-A', language='fr-FR')
     
     return str(response)
 
@@ -36,10 +38,12 @@ def menu_choice():
     if digits in menu:
         choix = menu[digits]
         gather = Gather(input="dtmf", num_digits=1, action=f"/quantity?item={choix}")
-        gather.say(f"Vous avez choisi {choix}. Combien en voulez-vous ? Appuyez sur un chiffre entre 1 et 6.")
+        gather.say(f"Vous avez choisi {choix}. Combien en voulez-vous ? Appuyez sur un chiffre entre 1 et 6.", 
+                   voice='fr-FR-Wavenet-A', language='fr-FR')
         response.append(gather)
     else:
-        response.say("Option invalide. Merci de réessayer.")
+        response.say("Option invalide. Merci de réessayer.", 
+                     voice='fr-FR-Wavenet-A', language='fr-FR')
         response.redirect("/voice")
 
     return str(response)
@@ -62,9 +66,11 @@ def quantity():
 
     if digits in quantites:
         quantite = quantites[digits]
-        response.say(f"Vous avez commandé {quantite} {item}(s). Merci pour votre commande !")
+        response.say(f"Vous avez commandé {quantite} {item}(s). Merci pour votre commande !", 
+                     voice='fr-FR-Wavenet-A', language='fr-FR')
     else:
-        response.say("Quantité invalide. Merci de réessayer.")
+        response.say("Quantité invalide. Merci de réessayer.", 
+                     voice='fr-FR-Wavenet-A', language='fr-FR')
         response.redirect(f"/menu_choice")
 
     return str(response)
