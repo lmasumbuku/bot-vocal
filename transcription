@@ -4,18 +4,20 @@ def transcription():
     transcribed_text = request.form.get("TranscriptionText", "")
     audio_url = request.form.get("RecordingUrl", "")
 
-    print(f"📞 Twilio a envoyé la transcription : {transcribed_text}")
+    print(f"📩 Twilio a envoyé les données suivantes : {request.form}")  # Debug complet
     print(f"🎙️ URL de l'enregistrement : {audio_url}")  
 
     if not transcribed_text and audio_url:
-        print("🚀 Aucun texte reçu de Twilio, transcription via OpenAI...")
+        print("🚀 Aucun texte reçu de Twilio, transcription via OpenAI Whisper...")
         transcribed_text = transcrire_avec_openai(audio_url)
 
-    # 🔍 Analyser la commande et extraire les plats/quantités
-    commande_analysee = analyser_commande(transcribed_text)
+    # 🔍 Vérifier si la transcription est vide
+    if not transcribed_text or transcribed_text == "Je n'ai pas compris votre commande.":
+        transcribed_text = "Commande non reconnue."
 
+    # 🔊 Répondre pour éviter que le bot reste muet
     response = VoiceResponse()
-    response.say(f"Vous avez commandé : {commande_analysee}. Merci pour votre commande !", 
+    response.say(f"Vous avez commandé : {transcribed_text}. Merci pour votre commande !", 
                  voice='alice', language='fr-FR')
 
     return str(response)
