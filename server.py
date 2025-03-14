@@ -19,13 +19,13 @@ def test():
 
 @app.route("/test_openai", methods=['GET'])
 def test_openai():
-    """ Teste OpenAI sur Render """
+    """ Teste OpenAI sur Render avec la nouvelle API """
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": "Donne-moi une commande typique dans un restaurant"}]
         )
-        return response["choices"][0]["message"]["content"]
+        return response.choices[0].message.content
     except Exception as e:
         return f"Erreur OpenAI : {str(e)}"
 
