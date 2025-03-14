@@ -36,19 +36,29 @@ def voice():
     """ Gère les appels et demande la commande du client """
     response = VoiceResponse()
 
+    # 📌 Dire une seule fois la phrase d’accueil
     response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
                  voice='alice', language='fr-FR')
 
     # 🎙️ Enregistrer la voix avec transcription activée
-    response.record(timeout=10, transcribe=True, transcribe_callback="/transcription", play_beep=True)
+    response.record(
+        timeout=10, 
+        transcribe=True, 
+        transcribe_callback="/transcription", 
+        play_beep=True,
+        max_length=15  # ⏳ Empêcher Twilio de couper trop tôt
+    )
 
-    # 🔄 Ajouter une pause pour éviter que Twilio raccroche immédiatement
+    # 🔄 Ajouter une pause pour éviter que Twilio recommence immédiatement
     response.pause(length=3)
 
-    # 🛑 Ajouter une réponse temporaire pour voir si Twilio fonctionne
-    response.say("Merci pour votre commande, elle est en cours de traitement.", voice='alice', language='fr-FR')
-
     return str(response)
+
+@app.route("/debug_transcription", methods=['POST'])
+def debug_transcription():
+    """ Vérifie les données envoyées par Twilio après l'enregistrement """
+    print("📩 Données reçues de Twilio :", request.form)
+    return "OK"
 
 @app.route("/transcription", methods=['POST'])
 def transcription():
