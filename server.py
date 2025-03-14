@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration de l'API OpenAI pour transcription avancée
-openai.api_key = "VOTRE_CLE_OPENAI"
+openai.api_key = "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"
 
 app = Flask(__name__)
 
