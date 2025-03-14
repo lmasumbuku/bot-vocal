@@ -20,29 +20,28 @@ def test():
 
 @app.route("/voice", methods=['POST'])
 def voice():
-    """ Gère les appels et demande la commande du client """
+    """ Gère les appels Twilio et demande la commande du client """
     response = VoiceResponse()
 
-    response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
+    response.say("Bienvenue dans votre restaurant ! Dites-moi votre commande après le bip.", 
                  voice='alice', language='fr-FR')
 
-    # 🎙️ Enregistrer l'appel sans transcription Twilio (on utilise OpenAI Whisper)
+    # 🎙️ Enregistrer l'appel et activer la transcription avec Twilio
     response.record(
-        timeout=10, 
-        play_beep=True,  
-        max_length=15  # ⏳ Empêcher une coupure trop rapide
+        timeout=10,
+        play_beep=True,
+        max_length=15,
+        recording_status_callback="/process_recording"  # Utilisation d'un callback pour traiter l'audio
     )
-
-    response.pause(length=2)
-    response.say("Merci pour votre commande. Nous la traitons.", voice='alice', language='fr-FR')
 
     return str(response)
 
-@app.route("/transcription", methods=['POST'])
-def transcription():
-    """ Récupère l'audio et l'envoie à OpenAI pour transcription """
+@app.route("/process_recording", methods=['POST'])
+def process_recording():
+    """ Récupère l'audio enregistré et envoie à OpenAI Whisper """
     audio_url = request.form.get("RecordingUrl", "")
-    print(f"🎙️ URL de l'enregistrement reçu : {audio_url}")
+
+    print(f"🎙️ URL de l'enregistrement Twilio reçu : {audio_url}")
 
     if not audio_url:
         print("❌ Aucun enregistrement reçu de Twilio !")
@@ -73,11 +72,7 @@ def transcription():
     commande_analysee = analyser_commande(transcribed_text)
     print(f"✅ Commande analysée : {commande_analysee}")
 
-    response = VoiceResponse()
-    response.say(f"Vous avez commandé : {commande_analysee}. Merci pour votre commande !", 
-                 voice='alice', language='fr-FR')
-
-    return str(response)
+    return commande_analysee  # Retourne la commande au système
 
 def transcrire_avec_openai(audio_path):
     """ 🔍 Envoie l'audio téléchargé à OpenAI Whisper pour transcription """
