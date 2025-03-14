@@ -36,21 +36,18 @@ def voice():
     """ Gère les appels et demande la commande du client """
     response = VoiceResponse()
 
-    # 📌 Dire une seule fois la phrase d’accueil
     response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
                  voice='alice', language='fr-FR')
 
-    # 🎙️ Enregistrer la voix avec transcription activée
+    # 🎙️ Enregistrer l'appel sans transcription (on utilisera OpenAI)
     response.record(
         timeout=10, 
-        transcribe=True, 
-        transcribe_callback="/transcription", 
-        play_beep=True,
-        max_length=15  # ⏳ Empêcher Twilio de couper trop tôt
+        play_beep=True,  
+        max_length=15  # ⏳ Eviter une coupure trop rapide
     )
 
-    # 🔄 Ajouter une pause pour éviter que Twilio recommence immédiatement
-    response.pause(length=3)
+    response.pause(length=2)
+    response.say("Merci pour votre commande. Nous la traitons.", voice='alice', language='fr-FR')
 
     return str(response)
 
