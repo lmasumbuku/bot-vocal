@@ -37,8 +37,14 @@ def voice():
     response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
                  voice='alice', language='fr-FR')
 
-    # 🎙️ Enregistrer l'appel et activer la transcription
+    # 🎙️ Enregistrer l'appel et activer la transcription avec une pause pour éviter la coupure
     response.record(timeout=10, transcribe=True, transcribe_callback="/transcription", play_beep=True)
+
+    # 🔄 Ajouter une pause pour éviter que Twilio raccroche immédiatement
+    response.pause(length=3)
+
+    # 🛑 Ajouter un message de confirmation pour éviter la coupure brutale
+    response.say("Merci pour votre commande, nous la traitons.", voice='alice', language='fr-FR')
 
     return str(response)
 
@@ -51,7 +57,7 @@ def transcription():
     print(f"📞 Twilio a envoyé la transcription : {transcribed_text}")  # Debug
 
     if not transcribed_text:
-        # Utiliser OpenAI Whisper pour améliorer la transcription
+        # Utiliser OpenAI Whisper pour améliorer la transcription si Twilio n'a rien envoyé
         transcribed_text = transcrire_avec_openai(audio_url)
 
     # 🔍 Analyser la commande et extraire les plats/quantités
@@ -62,6 +68,12 @@ def transcription():
                  voice='alice', language='fr-FR')
 
     return str(response)
+
+@app.route("/debug_transcription", methods=['POST'])
+def debug_transcription():
+    """ Vérifier ce que Twilio envoie réellement après l'enregistrement """
+    print("📩 Données reçues de Twilio :", request.form)
+    return "OK"
 
 def transcrire_avec_openai(audio_url):
     """ 🔍 Utilise OpenAI Whisper pour transcrire l'audio """
