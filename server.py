@@ -96,10 +96,11 @@ def transcription():
     transcribed_text = request.form.get("TranscriptionText", "")
     audio_url = request.form.get("RecordingUrl", "")
 
-    print(f"📞 Twilio a envoyé la transcription : {transcribed_text}")  # Debug
+    print(f"📞 Twilio a envoyé la transcription : {transcribed_text}")
+    print(f"🎙️ URL de l'enregistrement : {audio_url}")  
 
-    if not transcribed_text:
-        # Utiliser OpenAI Whisper pour améliorer la transcription si Twilio n'a rien envoyé
+    if not transcribed_text and audio_url:
+        print("🚀 Aucun texte reçu de Twilio, transcription via OpenAI Whisper...")
         transcribed_text = transcrire_avec_openai(audio_url)
 
     # 🔍 Analyser la commande et extraire les plats/quantités
