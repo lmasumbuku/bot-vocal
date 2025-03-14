@@ -82,6 +82,21 @@ def transcrire_avec_openai(audio_url):
         print(f"❌ Erreur OpenAI Whisper : {str(e)}")
         return "Erreur lors de la transcription."
 
+def transcrire_avec_openai(audio_path):
+    """ 🔍 Envoie l'audio à OpenAI et affiche les logs """
+    try:
+        print("🚀 Envoi de l'audio à OpenAI Whisper...")
+
+        with open(audio_path, "rb") as audio_file:
+            whisper_response = openai.Audio.transcribe("whisper-1", audio_file)
+
+        print(f"✅ Réponse OpenAI : {whisper_response.get('text')}")
+        return whisper_response.get("text", "Je n'ai pas compris votre commande.")
+
+    except Exception as e:
+        print(f"❌ Erreur OpenAI Whisper : {str(e)}")
+        return "Erreur lors de la transcription."
+
 @app.route("/transcription", methods=['POST'])
 def transcription():
     """ Vérifie si l’audio est bien récupéré avant l'envoi à OpenAI """
