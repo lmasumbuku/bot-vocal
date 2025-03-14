@@ -19,19 +19,21 @@ def test():
 
 @app.route("/test_openai", methods=['GET'])
 def test_openai():
-    """ Teste OpenAI sur Render avec la nouvelle API """
+    """ Teste OpenAI sur Render avec affichage des erreurs détaillées """
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": "Donne-moi une commande typique dans un restaurant"}]
         )
-        return response.choices[0].message.content
+        return response["choices"][0]["message"]["content"]
+    except openai.error.OpenAIError as e:
+        return f"Erreur OpenAI détectée : {str(e)}"
     except Exception as e:
-        return f"Erreur OpenAI : {str(e)}"
+        return f"Erreur inconnue : {str(e)}"
 
 @app.route("/voice", methods=['POST'])
 def voice():
-    """ Gère les appels et enregistre la commande """
+    """ Gère les appels et demande la commande du client """
     response = VoiceResponse()
 
     response.say("Bienvenue dans votre restaurant ! Que souhaitez-vous commander ?", 
@@ -71,7 +73,7 @@ def transcription():
 
 @app.route("/debug_transcription", methods=['POST'])
 def debug_transcription():
-    """ Vérifier ce que Twilio envoie réellement après l'enregistrement """
+    """ Vérifie les données envoyées par Twilio après l'enregistrement """
     print("📩 Données reçues de Twilio :", request.form)
     return "OK"
 
