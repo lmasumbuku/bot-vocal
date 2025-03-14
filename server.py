@@ -84,12 +84,6 @@ def transcrire_avec_openai(audio_url):
         print(f"❌ Erreur transcription OpenAI: {str(e)}")
         return "Erreur lors de la transcription."
 
-@app.route("/debug_transcription", methods=['POST'])
-def debug_transcription():
-    """ Vérifie les données envoyées par Twilio après l'enregistrement """
-    print("📩 Données reçues de Twilio :", request.form)
-    return "OK"
-
 @app.route("/transcription", methods=['POST'])
 def transcription():
     """ Récupère la transcription et affiche dans les logs """
