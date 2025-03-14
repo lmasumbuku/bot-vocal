@@ -1,21 +1,21 @@
+import requests
+
 @app.route("/transcription", methods=['POST'])
 def transcription():
-    """ Récupère la transcription et affiche dans les logs """
-    transcribed_text = request.form.get("TranscriptionText", "")
+    """ Récupère l'audio et l'envoie à OpenAI pour transcription """
     audio_url = request.form.get("RecordingUrl", "")
 
-    print(f"📩 Twilio a envoyé les données suivantes : {request.form}")  # Debug complet
-    print(f"🎙️ URL de l'enregistrement : {audio_url}")  
+    print(f"🎙️ URL de l'enregistrement reçu : {audio_url}")
 
-    if not transcribed_text and audio_url:
-        print("🚀 Aucun texte reçu de Twilio, transcription via OpenAI Whisper...")
-        transcribed_text = transcrire_avec_openai(audio_url)
+    if not audio_url:
+        print("❌ Aucun enregistrement reçu !")
+        return "Erreur : Aucun enregistrement reçu."
 
-    # 🔍 Vérifier si la transcription est vide
-    if not transcribed_text or transcribed_text == "Je n'ai pas compris votre commande.":
-        transcribed_text = "Commande non reconnue."
+    # 📥 Télécharger l'audio
+    transcribed_text = transcrire_avec_openai(audio_url)
 
-    # 🔊 Répondre pour éviter que le bot reste muet
+    print(f"✅ Transcription OpenAI : {transcribed_text}")
+
     response = VoiceResponse()
     response.say(f"Vous avez commandé : {transcribed_text}. Merci pour votre commande !", 
                  voice='alice', language='fr-FR')
