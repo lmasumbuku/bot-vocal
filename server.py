@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
-# Configuration de l'API OpenAI
+# Configuration OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
@@ -20,32 +20,31 @@ def test():
 
 @app.route("/voice", methods=['POST'])
 def voice():
-    """ Gère les appels Twilio et demande la commande du client """
+    """ Gère les appels et enregistre la commande du client """
     response = VoiceResponse()
 
-    response.say("Bienvenue dans votre restaurant ! Dites-moi votre commande après le bip.", 
-                 voice='alice', language='fr-FR')
+    response.say("Bienvenue ! Que souhaitez-vous commander ?", voice='alice', language='fr-FR')
 
-    # 🎙️ Enregistrer l'appel et activer la transcription avec Twilio
+    # 🎙️ Enregistrer la voix sans transcription Twilio
     response.record(
         timeout=10,
         play_beep=True,
-        max_length=15,
-        recording_status_callback="/process_recording"  # Utilisation d'un callback pour traiter l'audio
+        max_length=15
     )
+
+    response.say("Merci pour votre commande. Nous la traitons.", voice='alice', language='fr-FR')
 
     return str(response)
 
-@app.route("/process_recording", methods=['POST'])
-def process_recording():
-    """ Récupère l'audio enregistré et envoie à OpenAI Whisper """
+@app.route("/transcription", methods=['POST'])
+def transcription():
+    """ Télécharge l'audio de Twilio et le transcrit avec OpenAI Whisper """
     audio_url = request.form.get("RecordingUrl", "")
-
-    print(f"🎙️ URL de l'enregistrement Twilio reçu : {audio_url}")
+    print(f"🎙️ URL de l'enregistrement reçu : {audio_url}")
 
     if not audio_url:
-        print("❌ Aucun enregistrement reçu de Twilio !")
-        return "Erreur : Aucun enregistrement reçu."
+        print("❌ Aucun enregistrement reçu !")
+        return "Erreur : Aucun enregistrement."
 
     # 📥 Télécharger l'audio
     audio_path = "audio_twilio.mp3"
@@ -59,23 +58,22 @@ def process_recording():
         print(f"❌ Erreur lors du téléchargement : {response.status_code}")
         return "Erreur de récupération de l'audio."
 
-    # 📤 Envoyer l'audio à OpenAI Whisper pour transcription
+    # 📤 Envoyer l'audio à OpenAI Whisper
     transcribed_text = transcrire_avec_openai(audio_path)
-
     print(f"✅ Transcription OpenAI : {transcribed_text}")
 
-    # 🔍 Vérifier si la transcription est vide
-    if not transcribed_text or transcribed_text == "Je n'ai pas compris votre commande.":
-        transcribed_text = "Commande non reconnue."
-
-    # 🔍 Analyser la commande et extraire les plats/quantités
+    # 🔍 Analyse et réponse
     commande_analysee = analyser_commande(transcribed_text)
     print(f"✅ Commande analysée : {commande_analysee}")
 
-    return commande_analysee  # Retourne la commande au système
+    response = VoiceResponse()
+    response.say(f"Vous avez commandé : {commande_analysee}. Merci pour votre commande !", 
+                 voice='alice', language='fr-FR')
+
+    return str(response)
 
 def transcrire_avec_openai(audio_path):
-    """ 🔍 Envoie l'audio téléchargé à OpenAI Whisper pour transcription """
+    """ 🔍 Envoie l'audio téléchargé à OpenAI Whisper """
     try:
         print("🚀 Envoi de l'audio à OpenAI Whisper...")
 
@@ -90,7 +88,7 @@ def transcrire_avec_openai(audio_path):
         return "Erreur lors de la transcription."
 
 def analyser_commande(texte):
-    """ 🔍 Analyse la commande pour extraire les plats et quantités """
+    """ 🔍 Analyse la commande et détecte les plats et quantités """
     plats_disponibles = ["pizza", "burger", "salade", "sushi", "pâtes", "tacos"]
     quantites = ["un", "deux", "trois", "quatre", "cinq", "six"]
 
