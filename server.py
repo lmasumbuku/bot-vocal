@@ -54,11 +54,32 @@ def voice():
 
     return str(response)
 
+import requests
+
 def transcrire_avec_openai(audio_url):
-    """ 🔍 Utilise OpenAI Whisper pour transcrire l'audio de Twilio """
+    """ 🔍 Télécharge l'audio et l'envoie à OpenAI pour transcription """
     try:
-        response = openai.Audio.transcribe("whisper-1", audio_url)
-        return response.get("text", "Je n'ai pas compris votre commande.")
+        print(f"🚀 Téléchargement de l'audio depuis Twilio : {audio_url}")
+
+        # 📥 Télécharger l'audio de Twilio
+        response = requests.get(audio_url)
+        if response.status_code != 200:
+            print(f"❌ Erreur lors du téléchargement de l'audio: {response.status_code}")
+            return "Erreur de récupération de l'audio."
+
+        # 📂 Sauvegarde temporaire du fichier audio
+        audio_path = "audio_twilio.mp3"
+        with open(audio_path, "wb") as f:
+            f.write(response.content)
+
+        print("✅ Audio téléchargé avec succès, envoi à OpenAI Whisper...")
+
+        # 📤 Envoyer l'audio à OpenAI Whisper pour transcription
+        with open(audio_path, "rb") as audio_file:
+            whisper_response = openai.Audio.transcribe("whisper-1", audio_file)
+
+        return whisper_response.get("text", "Je n'ai pas compris votre commande.")
+    
     except Exception as e:
         print(f"❌ Erreur transcription OpenAI: {str(e)}")
         return "Erreur lors de la transcription."
